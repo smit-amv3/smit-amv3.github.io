@@ -86,6 +86,7 @@
       <label for="admin-password">Password</label>
       <input id="admin-password" type="password" autocomplete="current-password" required>
       <button id="sign-in" type="submit">Sign in</button>
+      <button id="forgot-password" type="button" style="background:#292934;border:1px solid #d92736">Forgot password?</button>
       <div id="image-controls" hidden>
         <hr>
         <label for="profile-file">Profile photo</label>
@@ -169,6 +170,24 @@
         panel.style.display = 'none';
         openButton.setAttribute('aria-expanded', 'false');
       }
+
+      document.getElementById('forgot-password').addEventListener('click', async () => {
+        const db = getClient();
+        if (!db) return;
+        const email = document.getElementById('admin-email').value.trim();
+        if (!email) { say('Enter your account email above first.'); document.getElementById('admin-email').focus(); return; }
+        const button = document.getElementById('forgot-password');
+        button.disabled = true;
+        say('Sending recovery email...');
+        try {
+          const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: 'https://smit-amv3.github.io/' });
+          if (error) { say('Could not send email: ' + error.message); return; }
+          say('If this email belongs to an account, a recovery link should arrive. Check Inbox and Spam.');
+        } catch (error) {
+          console.error(error);
+          say('Could not send the recovery email. Please try again later.');
+        } finally { button.disabled = false; }
+      });
 
       async function loadImages() {
         const db = getClient();

@@ -387,5 +387,42 @@
       loadImages();
     })();
   </script>
+  <div id="reset-password-box" style="display:none; padding:20px; background:#222; color:white;">
+  <h2>Set New Password</h2>
+  <input id="new-password" type="password"
+         placeholder="New password">
+  <button id="save-password">Save Password</button>
+  <p id="reset-message"></p>
+</div>
+
+<script>
+const resetBox = document.getElementById('reset-password-box');
+const resetMessage = document.getElementById('reset-message');
+
+const resetClient = window.supabase.createClient(
+  'https://piasnmobzksxjadxvagu.supabase.co',
+  'sb_publishable_cVGVrxVTGk_uP9k0o3Rv4A_L75h3311'
+);
+
+resetClient.auth.onAuthStateChange((event) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    resetBox.style.display = 'block';
+  }
+});
+
+document.getElementById('save-password').onclick = async () => {
+  const password = document.getElementById('new-password').value;
+  if (password.length < 8) {
+    resetMessage.textContent = 'Use at least 8 characters.';
+    return;
+  }
+
+  const { error } = await resetClient.auth.updateUser({ password });
+
+  resetMessage.textContent = error
+    ? error.message
+    : 'Password updated! You can now sign in.';
+};
+</script>
 </body>
 </html>
